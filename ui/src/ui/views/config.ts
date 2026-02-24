@@ -628,16 +628,6 @@ function renderAppearanceSection(props: ConfigProps) {
             </span>
           </div>
           ${
-            props.version
-              ? html`
-                <div class="settings-info-row">
-                  <span class="settings-info-row__label">Version</span>
-                  <span class="settings-info-row__value mono">v${props.version}</span>
-                </div>
-              `
-              : nothing
-          }
-          ${
             props.assistantName
               ? html`
                 <div class="settings-info-row">
@@ -848,15 +838,6 @@ export function renderConfig(props: ConfigProps) {
           </div>
 
           <div class="config-top-tabs__right">
-            ${
-              props.version
-                ? html`
-                    <span class="config-top-tabs__version" title=${`v${props.version}`}>
-                      v${props.version}
-                    </span>
-                  `
-                : nothing
-            }
             ${
               showModeToggle
                 ? html`
