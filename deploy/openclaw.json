@@ -1,0 +1,58 @@
+{
+  "gateway": {
+    "port": 18789,
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    },
+    "tailscale": {
+      "mode": "serve"
+    }
+  },
+  "channels": {
+    "signal": {
+      "dmPolicy": "allowlist",
+      "allowFrom": ["+YOUR_PHONE_NUMBER"],
+      "groupPolicy": "disabled",
+      "autoStart": true
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-opus-4-6",
+      "tools": {
+        "profile": "minimal",
+        "deny": ["browser", "exec", "canvas", "system.run", "applyPatch"]
+      }
+    }
+  },
+  "skills": {
+    "load": {
+      "watch": false
+    }
+  },
+  "tools": {
+    "profile": "minimal",
+    "deny": ["browser", "exec", "canvas", "system.run", "applyPatch"]
+  },
+  "tts": {
+    "provider": "elevenlabs",
+    "auto": "inbound",
+    "elevenlabs": {
+      "voiceId": "YOUR_VOICE_ID"
+    }
+  },
+  "ui": {
+    "assistant": {
+      "name": "Assistant"
+    }
+  },
+  "update": {
+    "channel": "stable",
+    "checkOnStart": false,
+    "auto": {
+      "enabled": false
+    }
+  }
+}
