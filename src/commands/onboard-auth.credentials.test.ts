@@ -28,12 +28,28 @@ describe("onboard auth credentials secret refs", () => {
     await lifecycle.cleanup();
   });
 
-  it("stores env-backed moonshot key as keyRef", async () => {
+  it("keeps env-backed moonshot key as plaintext by default", async () => {
     const env = await setupAuthTestEnv("openclaw-onboard-auth-credentials-");
     lifecycle.setStateDir(env.stateDir);
     process.env.MOONSHOT_API_KEY = "sk-moonshot-env";
 
     await setMoonshotApiKey("sk-moonshot-env");
+
+    const parsed = await readAuthProfilesForAgent<{
+      profiles?: Record<string, { key?: string; keyRef?: unknown }>;
+    }>(env.agentDir);
+    expect(parsed.profiles?.["moonshot:default"]).toMatchObject({
+      key: "sk-moonshot-env",
+    });
+    expect(parsed.profiles?.["moonshot:default"]?.keyRef).toBeUndefined();
+  });
+
+  it("stores env-backed moonshot key as keyRef when secret-input-mode=ref", async () => {
+    const env = await setupAuthTestEnv("openclaw-onboard-auth-credentials-ref-");
+    lifecycle.setStateDir(env.stateDir);
+    process.env.MOONSHOT_API_KEY = "sk-moonshot-env";
+
+    await setMoonshotApiKey("sk-moonshot-env", env.agentDir, { secretInputMode: "ref" });
 
     const parsed = await readAuthProfilesForAgent<{
       profiles?: Record<string, { key?: string; keyRef?: unknown }>;
@@ -80,7 +96,9 @@ describe("onboard auth credentials secret refs", () => {
     lifecycle.setStateDir(env.stateDir);
     process.env.CLOUDFLARE_AI_GATEWAY_API_KEY = "cf-secret";
 
-    await setCloudflareAiGatewayConfig("account-1", "gateway-1", "cf-secret");
+    await setCloudflareAiGatewayConfig("account-1", "gateway-1", "cf-secret", env.agentDir, {
+      secretInputMode: "ref",
+    });
 
     const parsed = await readAuthProfilesForAgent<{
       profiles?: Record<string, { key?: string; keyRef?: unknown; metadata?: unknown }>;
@@ -92,7 +110,7 @@ describe("onboard auth credentials secret refs", () => {
     expect(parsed.profiles?.["cloudflare-ai-gateway:default"]?.key).toBeUndefined();
   });
 
-  it("stores env-backed openai key as keyRef", async () => {
+  it("keeps env-backed openai key as plaintext by default", async () => {
     const env = await setupAuthTestEnv("openclaw-onboard-auth-credentials-openai-");
     lifecycle.setStateDir(env.stateDir);
     process.env.OPENAI_API_KEY = "sk-openai-env";
@@ -103,19 +121,35 @@ describe("onboard auth credentials secret refs", () => {
       profiles?: Record<string, { key?: string; keyRef?: unknown }>;
     }>(env.agentDir);
     expect(parsed.profiles?.["openai:default"]).toMatchObject({
+      key: "sk-openai-env",
+    });
+    expect(parsed.profiles?.["openai:default"]?.keyRef).toBeUndefined();
+  });
+
+  it("stores env-backed openai key as keyRef when secret-input-mode=ref", async () => {
+    const env = await setupAuthTestEnv("openclaw-onboard-auth-credentials-openai-ref-");
+    lifecycle.setStateDir(env.stateDir);
+    process.env.OPENAI_API_KEY = "sk-openai-env";
+
+    await setOpenaiApiKey("sk-openai-env", env.agentDir, { secretInputMode: "ref" });
+
+    const parsed = await readAuthProfilesForAgent<{
+      profiles?: Record<string, { key?: string; keyRef?: unknown }>;
+    }>(env.agentDir);
+    expect(parsed.profiles?.["openai:default"]).toMatchObject({
       keyRef: { source: "env", id: "OPENAI_API_KEY" },
     });
     expect(parsed.profiles?.["openai:default"]?.key).toBeUndefined();
   });
 
-  it("stores env-backed volcengine and byteplus keys as keyRef", async () => {
+  it("stores env-backed volcengine and byteplus keys as keyRef in ref mode", async () => {
     const env = await setupAuthTestEnv("openclaw-onboard-auth-credentials-volc-byte-");
     lifecycle.setStateDir(env.stateDir);
     process.env.VOLCANO_ENGINE_API_KEY = "volcengine-secret";
     process.env.BYTEPLUS_API_KEY = "byteplus-secret";
 
-    await setVolcengineApiKey("volcengine-secret");
-    await setByteplusApiKey("byteplus-secret");
+    await setVolcengineApiKey("volcengine-secret", env.agentDir, { secretInputMode: "ref" });
+    await setByteplusApiKey("byteplus-secret", env.agentDir, { secretInputMode: "ref" });
 
     const parsed = await readAuthProfilesForAgent<{
       profiles?: Record<string, { key?: string; keyRef?: unknown }>;
